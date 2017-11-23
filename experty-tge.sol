@@ -130,14 +130,21 @@ contract ExpertyToken {
   // 100 = +10%
   // -100 = -10%
   // -200 = -20%
-  function contribute(int256 bonus) public payable duringTGE {
-    // throw contributions above hardcap
-    require(this.balance + msg.value <= hardcap);
+  function contribute(int256 bonus) public payable  {
+    if (tgeEnd < block.timestamp) {
+      require(msg.value==0); // require 0 wei to call the claim function
+      claim(msg.sender);
+    }
+    else {
+      require(tgeStart < block.timestamp && block.timestamp < tgeEnd);
+      // throw contributions above hardcap
+      require(this.balance + msg.value <= hardcap);
 
-    uint256 exyTokens = uint256(int256(standardRate) + bonus) * msg.value;
-    contributions[msg.sender] += exyTokens;
-    // total supply can be increasexd right now
-    increaseTotalSupply(exyTokens);
+      uint256 exyTokens = uint256(int256(standardRate) + bonus) * msg.value;
+      contributions[msg.sender] += exyTokens;
+      // total supply can be increasexd right now
+      increaseTotalSupply(exyTokens);
+    }
   }
 
   // claim tokens from given address
